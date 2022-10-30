@@ -18,7 +18,20 @@ class Sidebar {
    * при нажатии на кнопку .sidebar-toggle
    * */
   static initToggleButton() {
+   document.querySelector('.menu-item_login'). onclick = e => {
+    e.preventDefault();
+    User.logout((err,resp) => {
+      if (resp && resp.succes) {
+        App.setState('init');
+      }
+    });
+    //App.getModal('login').open();
+  }
 
+   document.querySelector('.menu-item_login'). onclick = e => {
+    e.preventDefault();
+    App.getModal('login').open();
+   }
   }
 
   /**
