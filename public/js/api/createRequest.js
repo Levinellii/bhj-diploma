@@ -3,41 +3,39 @@
  * на сервер.
  * */
 const createRequest = (options = {}) => {
- const xhr = new XMLHttpRequest();
- xhr.responseType = 'json';
- let formData = null;
+const xhr = new XMLHttpRequest();
+const formData = new FormData();
+let url = options.url;    
 
- let url = options.url;
- if  (options.data) {
-    if (options.method === 'GET' ) {
-        url += '?' + Object .entries(data) .map(
-            entry => entry.map(encodeURIComponent).join('=')
-        ).join('&'); 
-     } else {
-           formData = new formData();
-           Object.entries(options.data).forEach(v => formData.append(...v));
-     }
+if (options.data) {
+        if(options.method === 'GET') {
+            url += '?' + Object.entries(options.data).map(
+                ([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`).join('&');
+        } else {
+            Object.entries(options.data).forEach(value => formData.append(...value));
+        };
+    };
 
- }
- if (options.callback){
- xhr.onload =() =>{
-    let err = null;
-    let resp = null;
+    xhr.onreadystatechange = () => {
+        if (xhr.readyState === 4) {
+            let err = null;
+            let response = null;
 
-    try{
-    if (xhr.response?.success){
-        resp = xhr .response;
-    } else {
-        err = xhr.response;
+            if(xhr.status === 200) {
+                if (xhr.response && xhr.response.success) {
+                    response = xhr.response;
+                } else {
+                    err = xhr.response;
+                }
+            } else {
+                err = new Error('Ошибка в ответе сервера.'); 
+            }
+            options.callback(err, response);
+        }
     }
- } catch (e) {
-    err=e;
- }
- options.callback(err,resp);
-};
- }
+    xhr.responseType = 'json';
+    xhr.open (options.method, url);
+    xhr.send(formData);
 
-
- xhr .open(options.method, url);
- xhr .send(formData)
 };
+
